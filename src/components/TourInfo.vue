@@ -58,8 +58,6 @@ async function getGuguns(event) {
         console.log(error);
     });
 }
-
-// eslint-disable-next-line no-unused-vars
 async function search(event) {
     if (state.sidoCode === 0 || state.gugunCode === 0 || state.contentTypeId === 0) {
         alert('지역과 분류를 선택해주세요.');

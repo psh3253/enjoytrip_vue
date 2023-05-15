@@ -49,7 +49,11 @@ export default {
     const store = useStore();
     const accessToken = computed(() => store.state.accessToken);
     function logout() {
-        axios.post('/logout', {})
+        axios.post('/users/logout', {}, {
+            headers: {
+                Authorization: `Bearer ${accessToken.value}`
+            }
+        })
             .then(() => {
                 store.commit('logout');
                 router.push('/');

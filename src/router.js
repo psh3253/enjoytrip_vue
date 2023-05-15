@@ -18,6 +18,18 @@ export default createRouter({
         {
             path: '/tour-info',
             component: () => import('./components/TourInfo.vue')
+        },
+        {
+            path: '/posts',
+            component: () => import('./components/PostList.vue')
+        },
+        {
+            path: '/posts/create',
+            component: () => import('./components/PostCreate.vue')
+        },
+        {
+            path: '/posts/:id',
+            component: () => import('./components/Post.vue')
         }
     ]
 });
