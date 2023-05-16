@@ -7,9 +7,11 @@ import router from "@/router";
 
 const state = reactive({
     post: {},
-    user: {}
+    user: {},
+    likeUsers: []
 });
 const accessToken = computed(() => store.state.accessToken);
+const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
 
 const route = useRoute();
 
@@ -38,6 +40,33 @@ onMounted(async () => {
     }).then(function (response) {
         if (response.status === 200) {
             state.user = readonly(response.data);
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+    await axios.get(`/posts/${route.params.id}/like`, {
+        headers: {
+            Authorization: `Bearer ${accessToken.value}`
+        }
+    }).then(function (response) {
+        if (response.status === 200) {
+            state.likeUsers = response.data.map(user => {
+                let now = new Date();
+                if (now.getFullYear() === new Date(user.createdAt).getFullYear() &&
+                    now.getMonth() === new Date(user.createdAt).getMonth() &&
+                    now.getDate() === new Date(user.createdAt).getDate()
+                ) {
+                    return {
+                        ...user,
+                        createdAt: user.createdAt.substring(11, 16)
+                    };
+                } else {
+                    return {
+                        ...user,
+                        createdAt: user.createdAt.substring(0, 10)
+                    };
+                }
+            });
         }
     }).catch(function (error) {
         console.log(error);
@@ -131,7 +160,7 @@ async function togglePostNotice() {
                         <button class="btn btn-danger" @click="deletePost">삭제</button>
                     </div>
                 </div>
-                <div class="d-flex">
+                <div class="d-flex mb-3">
                     <a href="#" class="text-decoration-none text-danger me-2" @click="togglePostLike">
                         <svg v-if="state.post.liked" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                              fill="currentColor"
@@ -146,6 +175,20 @@ async function togglePostNotice() {
                     </a>
                     <span>좋아요&nbsp;</span>
                     <span class="fw-bold">{{ state.post.likeCount }}</span>
+                </div>
+                <div>
+                    <div class="row">
+                        <div class="col-3 d-flex align-items-center mb-3" v-for="user in state.likeUsers">
+                            <div class="d-flex me-3">
+                                <img :src="`${apiBaseUrl}/users/images/${user.creatorImage}`"
+                                     class="rounded-circle border border-2 border-dark" width="32" height="32" alt="">
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">{{ user.creatorNickname }}</span>
+                                <span class="text-secondary">{{ user.createdAt }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
