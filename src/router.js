@@ -29,7 +29,11 @@ export default createRouter({
         },
         {
             path: '/posts/:id',
-            component: () => import('./components/Post.vue')
+            component: () => import('./components/PostDetails.vue')
+        },
+        {
+            path: '/posts/:id/update',
+            component: () => import('./components/PostUpdate.vue')
         }
     ]
 });
