@@ -1,5 +1,38 @@
 <script setup>
+import {onMounted, reactive} from "vue";
+import axios from "axios";
 
+const state = reactive({
+    noticePosts: [],
+    hotPosts: [],
+    latestPosts: []
+});
+
+onMounted(async () => {
+    await axios.get('/posts/home?type=notice').then(function (response) {
+        if (response.status === 200) {
+            state.noticePosts = response.data;
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+
+    await axios.get('/posts/home?type=hot').then(function (response) {
+        if (response.status === 200) {
+            state.hotPosts = response.data;
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+
+    await axios.get('/posts/home?type=latest').then(function (response) {
+        if (response.status === 200) {
+            state.latestPosts = response.data;
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+})
 </script>
 
 <template>
@@ -35,75 +68,36 @@
     <div class="container mb-3">
       <div class="row justify-content-center">
         <div class="col-3 border border-info rounded-3 p-3 me-3">
-          <div class="d-flex justify-content-between mb-2">
+          <div class="d-flex mb-2">
             <span class="fw-bold h4">공지사항</span>
-            <button class="btn btn-outline-info rounded-5">+</button>
           </div>
           <div class="border mb-3"></div>
           <div>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 </p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 </p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
+              <router-link v-for="post in state.noticePosts" :to="`/posts/${post.id}`" :key="`${post.id}`" class="text-decoration-none text-black">
+                <p>{{ post.title }}</p>
+              </router-link>
           </div>
         </div>
         <div class="col-3 border border-info rounded-3 p-3 me-3">
-          <div class="d-flex justify-content-between mb-2">
+          <div class="d-flex mb-2">
             <span class="fw-bold h4">인기글</span>
-            <button class="btn btn-outline-info rounded-5">+</button>
           </div>
           <div class="border mb-3"></div>
           <div>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 </p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 </p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
+              <router-link v-for="post in state.hotPosts" :to="`/posts/${post.id}`" :key="`${post.id}`" class="text-decoration-none text-black">
+                  <p>{{ post.title }}</p>
+              </router-link>
           </div>
         </div>
         <div class="col-3 border border-info rounded-3 p-3">
-          <div class="d-flex justify-content-between mb-2">
-            <span class="fw-bold h4">핫플레이스</span>
-            <button class="btn btn-outline-info rounded-5">+</button>
+          <div class="d-flex mb-2">
+            <span class="fw-bold h4">최신글</span>
           </div>
           <div class="border mb-3"></div>
           <div>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 </p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 </p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
-            <a href="#" class="text-decoration-none text-black">
-              <p>공지사항1 공지사항1 공지사항1 공지사항1 공지사항1 공지사항1</p>
-            </a>
+              <router-link v-for="post in state.latestPosts" :to="`/posts/${post.id}`" :key="`${post.id}`" class="text-decoration-none text-black">
+                  <p>{{ post.title }}</p>
+              </router-link>
           </div>
         </div>
       </div>
@@ -111,5 +105,10 @@
 </template>
 
 <style scoped>
-
+p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
+}
 </style>

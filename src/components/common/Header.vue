@@ -16,7 +16,7 @@
               <router-link class="nav-link text-white fw-bold" to="/tour-info">지역별관광지</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link text-white fw-bold" to="/hotplaces">핫플레이스</router-link>
+              <router-link class="nav-link text-white fw-bold" to="/hot-places">핫플레이스</router-link>
             </li>
             <li class="nav-item">
               <router-link class="nav-link text-white fw-bold" to="/posts">게시판</router-link>

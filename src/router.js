@@ -34,6 +34,21 @@ export default createRouter({
         {
             path: '/posts/:id/update',
             component: () => import('./components/PostUpdate.vue')
+        },
+        {
+            path: '/hot-places',
+            component: () => import('./components/HotPlaceList.vue')
+        },
+        {
+            path: '/hot-places/create',
+            component: () => import('./components/HotPlaceCreate.vue')
+        },
+        {
+            path: '/hot-places/:id',
+            component: () => import('./components/HotPlaceDetails.vue')
+        }, {
+            path: '/hot-places/:id/update',
+            component: () => import('./components/HotPlaceUpdate.vue')
         }
     ]
 });

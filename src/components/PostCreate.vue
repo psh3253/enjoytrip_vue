@@ -35,7 +35,7 @@ async function write(event) {
         }
     }).catch(function (error) {
         alert("게시글 작성에 실패했습니다.");
-        console.log(error);
+        console.error(error);
     });
 }
 </script>

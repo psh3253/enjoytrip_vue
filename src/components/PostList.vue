@@ -27,21 +27,28 @@ onMounted(async () => {
         return;
     }
     // querystring으로부터 얻어오기
-    state.currentPage =  Number(new URLSearchParams(window.location.search).get('page')) || 1;
+    state.currentPage = Number(new URLSearchParams(window.location.search).get('page')) || 1;
+    state.keyword = new URLSearchParams(window.location.search).get('keyword') || '';
     // 데이터 로딩 함수 호출
     await loadData();
 });
 
-watch(() => state.currentPage, async (newPage) => {
-    await loadData(newPage);
-});
 function updateCurrentPage(page) {
     state.currentPage = page;
+    loadData();
+}
+ function search(event) {
+    event.preventDefault();
+    state.currentPage = 1;
+    loadData();
 }
 
 async function loadData() {
     // 페이지 정보 요청
     await axios.get('/posts/page', {
+        params: {
+            keyword: state.keyword
+        },
         headers: {
             Authorization: `Bearer ${accessToken.value}`
         }
@@ -68,6 +75,7 @@ async function loadData() {
     // 포스트 데이터 요청
     await axios.get('/posts', {
         params: {
+            keyword: state.keyword,
             page: state.currentPage
         },
         headers: {
@@ -97,6 +105,7 @@ async function loadData() {
         console.log(error);
     });
 }
+
 </script>
 
 <template>
@@ -104,10 +113,10 @@ async function loadData() {
         <div class="d-flex flex-column container">
             <h1 class="fw-bold mt-5 mb-3 text-center">여행 정보 공유</h1>
             <div class="d-flex justify-content-end mb-2">
-                <form class="d-flex" action="${root}/posts" method="get">
-                    <input class="form-control me-2" type="search" name="keyword" placeholder="검색어를 입력하세요"
+                <form class="d-flex" @submit="search">
+                    <input class="form-control me-2" v-model="state.keyword" placeholder="검색어를 입력하세요"
                            aria-label="Search">
-                    <button class="btn btn-info text-white" type="submit">검색</button>
+                    <button type="submit" class="btn btn-info text-white">검색</button>
                 </form>
             </div>
             <table class="table table-bordered" style="table-layout: fixed">
@@ -130,12 +139,17 @@ async function loadData() {
                         {{ post.id }}
                     </th>
                     <td>
+                        <span>
                         <router-link v-if="post.notice" class="text-decoration-none text-info fw-bold"
                                      :to="`/posts/${post.id}`">&nbsp;{{ post.title }}
                         </router-link>
                         <router-link v-else class="text-decoration-none text-black"
                                      :to="`/posts/${post.id}`">&nbsp;{{ post.title }}
                         </router-link>
+                            <router-link :to="`/posts/${post.id}#comments`" class="text-info text-decoration-none" v-if="post.commentCount > 0">
+                                [{{post.commentCount}}]
+                            </router-link>
+                        </span>
                     </td>
                     <td class="text-center">
                         {{ post.creatorNickname }}
@@ -154,15 +168,25 @@ async function loadData() {
                     <ul class="pagination">
                         <!-- li속성에 page-item을 class에 추가하고 특정 조건에 따라 disabled를 추가해야함 -->
                         <li :class="[{'page-item': true}, {'disabled': state.prevPageGroup < 0}]">
-                            <router-link :class="[{'page-link': true}, {'text-info': state.prevPageGroupPage > 0}]" :to="`/posts?page=${state.prevPageGroupPage}`" @click="updateCurrentPage(state.prevPageGroupPage)">이전</router-link>
+                            <button :class="[{'page-link': true}, {'text-info': state.prevPageGroupPage > 0}]"
+                                         @click="updateCurrentPage(state.prevPageGroupPage)">이전
+                            </button>
                         </li>
-                        <li v-for="page in state.pageGroup" :key="page" :class="[{'page-item': true}, {'active': page === state.currentPage}]">
-                            <router-link v-if="page === state.currentPage" class="page-link bg-info text-white border-info" :to="`/posts?page=${page}`" @click="updateCurrentPage(page)">{{ page }}</router-link>
-                            <router-link v-else class="page-link text-info" :to="`/posts?page=${page}`" @click="updateCurrentPage(page)">{{ page }}
-                            </router-link>
+                        <li v-for="page in state.pageGroup" :key="page"
+                            :class="[{'page-item': true}, {'active': page === state.currentPage}]">
+                            <button v-if="page === state.currentPage"
+                                         class="page-link bg-info text-white border-info"
+                                         @click="updateCurrentPage(page)">{{ page }}
+                            </button>
+                            <button v-else class="page-link text-info"
+                                         @click="updateCurrentPage(page)">{{ page }}
+                            </button>
                         </li>
                         <li :class="[{'page-item': true}, {'disabled': state.nextPageGroupPage > state.maxPage}]">
-                            <router-link :class="[{'page-link': true}, {'text-info': state.nextPageGroupPage <= state.maxPage}]" :to="`/posts?page=${state.nextPageGroupPage}`" @click="updateCurrentPage(state.nextPageGroupPage)">다음</router-link>
+                            <button
+                                    :class="[{'page-link': true}, {'text-info': state.nextPageGroupPage <= state.maxPage}]"
+                                    @click="updateCurrentPage(state.nextPageGroupPage)">다음
+                            </button>
                         </li>
                     </ul>
                 </nav>
@@ -177,7 +201,8 @@ td {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-button {
+
+.btn {
     word-break: keep-all;
 }
 </style>

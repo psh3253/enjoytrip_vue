@@ -11,10 +11,11 @@ const state = reactive({
     markers: [],
     tourList: [],
     latSum: 0,
-    lngSum: 0,
-    map: null
+    lngSum: 0
 });
 const noneImage = require('@/assets/img/none.jpg');
+
+let map = {};
 
 onMounted(async () => {
     await axios.get('/tours/sidos')
@@ -38,7 +39,7 @@ onMounted(async () => {
             };
 
             // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
-            state.map = new kakao.maps.Map(mapContainer, mapOption);
+            map = new kakao.maps.Map(mapContainer, mapOption);
         })
     })
     document.head.appendChild(script)
@@ -58,7 +59,7 @@ async function getGuguns(event) {
         console.log(error);
     });
 }
-async function search(event) {
+async function search() {
     if (state.sidoCode === 0 || state.gugunCode === 0 || state.contentTypeId === 0) {
         alert('지역과 분류를 선택해주세요.');
         return;
@@ -85,8 +86,8 @@ async function search(event) {
 
             await makeMarker();
             // showTables();
-            state.map.setCenter(new kakao.maps.LatLng(state.latSum / state.tourList.length, state.lngSum / state.tourList.length));
-            state.map.setLevel(8);
+            map.setCenter(new kakao.maps.LatLng(state.latSum / state.tourList.length, state.lngSum / state.tourList.length));
+            map.setLevel(8);
         }
     }).catch(function (error) {
         console.log(error);
@@ -97,7 +98,7 @@ function makeMarker() {
     for (let i = 0; i < state.tourList.length; i++) {
         const tour = state.tourList[i];
         const marker = new kakao.maps.Marker({
-            map: state.map,
+            map: map,
             position: new kakao.maps.LatLng(tour.latitude, tour.longitude)
         });
         state.latSum += Number(tour.latitude);
@@ -117,13 +118,13 @@ function makeMarker() {
                             <span class="ms-3 me-3 mb-3">${tour.address}</span>
                             </div>`;
         }
-        const infowindow = new kakao.maps.InfoWindow({
+        const infoWindow = new kakao.maps.InfoWindow({
             content: tourInfo,
             removable: true
         });
 
         kakao.maps.event.addListener(marker, 'click', function () {
-            infowindow.open(state.map, marker);
+            infoWindow.open(map, marker);
         });
     }
 }
@@ -177,7 +178,7 @@ function makeMarker() {
         <p class="text-center fw-bold">※ 최대 30개만 표시됩니다.</p>
         <div class="d-flex justify-content-center mb-5">
             <div class="container-fluid w-75 text-center">
-                <table class="table table-info table-hover table-striped table-bordered round-3 mb-3">
+                <table class="table table-hover table-bordered round-3 mb-3">
                     <thead>
                     <tr>
                         <th scope="col" style="width: 10%;">사진</th>
