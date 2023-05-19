@@ -18,10 +18,10 @@ function checkPassword() {
         return;
     }
     if (state.password === state.password_confirm) {
-        state.announce = "비밀번호가 일치합니다.";
+        state.announce = "비밀번호 확인이 일치합니다.";
         state.announceColor = "green";
     } else {
-        state.announce = "비밀번호가 일치하지 않습니다.";
+        state.announce = "비밀번호 확인이 일치하지 않습니다.";
         state.announceColor = "red";
     }
 }
@@ -33,7 +33,7 @@ async function join(event) {
         return;
     }
     if (state.password !== state.password_confirm) {
-        alert("비밀번호가 일치하지 않습니다.");
+        alert("비밀번호가 확인이 일치하지 않습니다.");
         return;
     }
     await axios.post('/users/join', {

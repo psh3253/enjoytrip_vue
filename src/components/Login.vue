@@ -22,7 +22,7 @@ async function login(event) {
         if (response.status === 200) {
             const {accessToken, refreshToken} = response.data;
             store.commit('login', {accessToken: accessToken, refreshToken: refreshToken});
-            router.push('/');
+            location.href = '/';
         }
     }).catch((error) => {
         if (error.response.status === 401) {

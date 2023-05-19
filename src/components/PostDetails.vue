@@ -218,8 +218,8 @@ function showComments() {
                              class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
                     </div>
                     <div class="d-flex flex-column">
-                        <span class="fw-bold">{{ state.post.creatorNickname }}</span>
-                        <span class="text-secondary">{{ state.post.createdAt }}&nbsp;조회&nbsp;{{
+                        <span class="fw-bold"><router-link :to="`/users/${state.post.creatorId}`" class="profile text-reset">{{ state.post.creatorNickname }}</router-link></span>
+                        <span class="text-secondary text-opacity-75">{{ state.post.createdAt }}&nbsp;조회&nbsp;{{
                             state.post.views
                             }}</span>
                     </div>
@@ -274,7 +274,7 @@ function showComments() {
                                      class="rounded-circle border border-2 border-dark" width="32" height="32" alt="">
                             </div>
                             <div class="d-flex flex-column">
-                                <span class="fw-bold">{{ user.creatorNickname }}</span>
+                                <span class="fw-bold"><router-link :to="`/users/${user.creatorId}`" class="profile text-reset">{{ user.creatorNickname }}</router-link></span>
                                 <span class="text-secondary fs-6">{{ user.createdAt }}</span>
                             </div>
                         </div>
@@ -291,7 +291,7 @@ function showComments() {
                                 </div>
                                 <div class="d-flex flex-column flex-fill">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold">{{ comment.creatorNickname }}&nbsp;
+                                    <span class="fw-bold"><router-link :to="`/users/${comment.creatorId}`" class="profile text-reset">{{ comment.creatorNickname }}</router-link>&nbsp;
                                         <span v-if="state.post.creatorId === comment.creatorId" class="badge bg-info">
                                             작성자
                                         </span>
@@ -327,5 +327,11 @@ function showComments() {
 <style scoped>
 .title {
     word-break: break-all;
+}
+.profile {
+    text-decoration: none;
+}
+.profile:hover {
+    text-decoration: underline;
 }
 </style>

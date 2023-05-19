@@ -1,3 +1,47 @@
+<script setup>
+import {useStore} from "vuex";
+import {computed, onMounted, reactive} from "vue";
+import axios from "axios";
+import router from "@/router";
+
+const state = reactive({
+    user: {}
+})
+
+const store = useStore();
+const accessToken = computed(() => store.state.accessToken);
+
+onMounted(async () => {
+    if(accessToken.value) {
+        await axios.get('/users/me', {
+            headers: {
+                Authorization: `Bearer ${accessToken.value}`
+            }
+        }).then(function (response) {
+            if (response.status === 200) {
+                state.user = response.data;
+            }
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
+})
+function logout() {
+    axios.post('/users/logout', {}, {
+        headers: {
+            Authorization: `Bearer ${accessToken.value}`
+        }
+    })
+        .then(() => {
+            store.commit('logout');
+            router.push('/');
+        })
+        .catch(() => {
+            alert('로그아웃 실패');
+        });
+}
+</script>
+
 <template>
   <header>
     <nav class="navbar navbar-expand-lg bg-info bg-opacity-75" data-bs-theme="dark">
@@ -27,7 +71,7 @@
             <router-link class="btn btn-info text-white fw-bold" to="/join">회원가입</router-link>
           </div>
           <div v-else>
-            <router-link class="btn btn-info me-3 text-white fw-bold" to="/my-page">마이페이지</router-link>
+            <router-link class="btn btn-info me-3 text-white fw-bold" :to="`/users/${state.user.id}`">마이페이지</router-link>
             <button class="btn btn-info text-white fw-bold" @click="logout">로그아웃</button>
           </div>
         </div>
@@ -35,38 +79,6 @@
     </nav>
   </header>
 </template>
-
-<script>
-import {useStore} from "vuex";
-import axios from "axios";
-import router from "@/router";
-import {computed} from "vue";
-
-export default {
-  // eslint-disable-next-line vue/multi-word-component-names
-  name: "Header",
-  setup() {
-    const store = useStore();
-    const accessToken = computed(() => store.state.accessToken);
-    function logout() {
-        axios.post('/users/logout', {}, {
-            headers: {
-                Authorization: `Bearer ${accessToken.value}`
-            }
-        })
-            .then(() => {
-                store.commit('logout');
-                router.push('/');
-            })
-            .catch(() => {
-                alert('로그아웃 실패');
-            });
-    }
-    return {accessToken, logout};
-  }
-
-}
-</script>
 
 <style scoped>
 

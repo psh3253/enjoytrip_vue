@@ -152,7 +152,7 @@ async function loadData() {
                         </span>
                     </td>
                     <td class="text-center">
-                        {{ post.creatorNickname }}
+                        <router-link :to="`/users/${post.creatorId}`" class="profile text-reset">{{ post.creatorNickname }}</router-link>
                     </td>
                     <td class="text-center">{{ post.createdAt }}</td>
                     <td class="text-center">{{ post.likeCount }}</td>
@@ -204,5 +204,11 @@ td {
 
 .btn {
     word-break: keep-all;
+}
+.profile {
+    text-decoration: none;
+}
+.profile:hover {
+    text-decoration: underline;
 }
 </style>

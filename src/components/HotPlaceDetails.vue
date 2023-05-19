@@ -132,8 +132,8 @@ async function deleteHotPlace()
                                      class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
                             </div>
                             <div class="d-flex flex-column">
-                                <span class="fw-bold">{{ state.hotPlace.creatorNickname }}</span>
-                                <span class="text-secondary">{{ state.hotPlace.createdAt }}&nbsp;조회&nbsp;0</span>
+                                <span class="fw-bold"><router-link :to="`/users/${state.hotPlace.creatorId}`" class="profile text-reset">{{ state.hotPlace.creatorNickname }}</router-link></span>
+                                <span class="text-secondary">{{ state.hotPlace.createdAt }}&nbsp;조회&nbsp;{{state.hotPlace.views}}</span>
                             </div>
                         </div>
                         <p class="fw-bold">다녀온 날짜 : {{ state.hotPlace.visitDate }}</p>
@@ -164,5 +164,10 @@ async function deleteHotPlace()
 </template>
 
 <style scoped>
-
+.profile {
+    text-decoration: none;
+}
+.profile:hover {
+    text-decoration: underline;
+}
 </style>

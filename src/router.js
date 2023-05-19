@@ -46,9 +46,22 @@ export default createRouter({
         {
             path: '/hot-places/:id',
             component: () => import('./components/HotPlaceDetails.vue')
-        }, {
+        },
+        {
             path: '/hot-places/:id/update',
             component: () => import('./components/HotPlaceUpdate.vue')
+        },
+        {
+            path: '/users/:id',
+            component: () => import('./components/UserDetails.vue')
+        },
+        {
+            path: '/users/change-password',
+            component: () => import('./components/PasswordChange.vue')
+        },
+        {
+            path: '/users/edit-profile',
+            component: () => import('./components/ProfileEdit.vue')
         }
     ]
 });
