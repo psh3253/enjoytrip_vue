@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, reactive} from "vue";
+import {computed, onMounted, reactive, readonly, watch} from "vue";
 import store from "@/store";
 import router from "@/router";
 import {useRoute} from "vue-router";
@@ -12,11 +12,23 @@ const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
 const state = reactive({
     user: {},
     posts: [],
-    likePosts: [],
-    commentPosts: [],
-    postsCurrentPage: 1,
-    likePostsCurrentPage: 1,
-    commentPostsCurrentPage: 1,
+    // likePosts: [],
+    // commentPosts: [],
+    // postsCurrentPage: 1,
+    // likePostsCurrentPage: 1,
+    // commentPostsCurrentPage: 1,
+
+    type: "post",
+    startPage: 1,
+    endPage: 1,
+    currentPage: 1,
+    currentPageGroup: 1,
+    pageGroup: [],
+    nextPageGroup: 1,
+    prevPageGroup: 1,
+    nextPageGroupPage: 1,
+    prevPageGroupPage: 1,
+    maxPage: 1,
 });
 
 onMounted(async () => {
@@ -36,10 +48,52 @@ onMounted(async () => {
         console.log(error);
     });
 
-    await axios.get(`/users/${route.params.id}/posts`, {
+    loadData();
+});
+
+function updateCurrentPage(page) {
+    state.currentPage = page;
+    loadData();
+}
+
+function updateType(type) {
+    state.currentPage = 1;
+    state.type = type;
+    loadData();
+}
+
+async function loadData() {
+    //페이지 정보 요청
+    const url = `/posts/profile-page`; // 요청 URL
+
+    await axios.get(url, {
         params: {
-            type: 'post',
-            page: state.postsCurrentPage
+            type: state.type
+        }
+    }).then(function (response) {
+        if (response.status === 200) {
+            state.maxPage = readonly(response.data);
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+
+    state.currentPageGroup = Math.floor((state.currentPage - 1) / 10);
+    state.nextPageGroup = state.currentPageGroup + 1;
+    state.nextPageGroupPage = state.nextPageGroup * 10 + 1;
+    state.prevPageGroup = state.currentPageGroup - 1;
+    state.prevPageGroupPage = state.prevPageGroup * 10 + 10;
+    state.startPage = state.currentPageGroup * 10 + 1;
+    state.endPage = Math.min(state.startPage + 9, state.maxPage);
+    state.pageGroup = [];
+    for (let i = state.startPage; i <= state.endPage; i++) {
+        state.pageGroup.push(i);
+    }
+
+    await axios.get(`/posts/profile-posts`, {
+        params: {
+            type: state.type,
+            page: state.currentPage
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -64,65 +118,8 @@ onMounted(async () => {
     }).catch(function (error) {
         console.log(error);
     });
+}
 
-    await axios.get(`/users/${route.params.id}/posts`, {
-        params: {
-            type: 'like',
-            page: state.likePostsCurrentPage
-        }
-    }).then(function (response) {
-        if (response.status === 200) {
-            state.likePosts = response.data.map(post => {
-                let now = new Date();
-                if (now.getFullYear() === new Date(post.createdAt).getFullYear() &&
-                    now.getMonth() === new Date(post.createdAt).getMonth() &&
-                    now.getDate() === new Date(post.createdAt).getDate()
-                ) {
-                    return {
-                        ...post,
-                        createdAt: post.createdAt.substring(11, 16)
-                    };
-                } else {
-                    return {
-                        ...post,
-                        createdAt: post.createdAt.substring(0, 10)
-                    };
-                }
-            });
-        }
-    }).catch(function (error) {
-        console.log(error);
-    });
-
-    await axios.get(`/users/${route.params.id}/posts`, {
-        params: {
-            type: 'comment',
-            page: state.commentPostsCurrentPage
-        }
-    }).then(function (response) {
-        if (response.status === 200) {
-            state.commentPosts = response.data.map(post => {
-                let now = new Date();
-                if (now.getFullYear() === new Date(post.createdAt).getFullYear() &&
-                    now.getMonth() === new Date(post.createdAt).getMonth() &&
-                    now.getDate() === new Date(post.createdAt).getDate()
-                ) {
-                    return {
-                        ...post,
-                        createdAt: post.createdAt.substring(11, 16)
-                    };
-                } else {
-                    return {
-                        ...post,
-                        createdAt: post.createdAt.substring(0, 10)
-                    };
-                }
-            });
-        }
-    }).catch(function (error) {
-        console.log(error);
-    });
-});
 </script>
 
 <template>
@@ -155,19 +152,19 @@ onMounted(async () => {
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active custom-color" id="post-tab" data-bs-toggle="tab"
                                     data-bs-target="#post-tab-pane" type="button" role="tab"
-                                    aria-controls="home-tab-pane" aria-selected="true">작성글
+                                    aria-controls="home-tab-pane" aria-selected="true" @click="updateType('post')">작성글
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link custom-color" id="comment-tab" data-bs-toggle="tab"
                                     data-bs-target="#comment-tab-pane" type="button" role="tab"
-                                    aria-controls="profile-tab-pane" aria-selected="false">댓글단 글
+                                    aria-controls="profile-tab-pane" aria-selected="false" @click="updateType('comment')">댓글단 글
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link custom-color" id="like-tab" data-bs-toggle="tab"
                                     data-bs-target="#like-tab-pane" type="button" role="tab"
-                                    aria-controls="like-tab-pane" aria-selected="false">좋아요한 글
+                                    aria-controls="like-tab-pane" aria-selected="false" @click="updateType('like')">좋아요한 글
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
@@ -216,7 +213,7 @@ onMounted(async () => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr v-for="post in state.commentPosts" :key="post.id">
+                                <tr v-for="post in state.posts" :key="post.id">
                                     <td class="text-center">{{ post.id }}</td>
                                     <td>
                                         <span>
@@ -244,7 +241,7 @@ onMounted(async () => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr v-for="post in state.likePosts" :key="post.id">
+                                <tr v-for="post in state.posts" :key="post.id">
                                     <td class="text-center">{{ post.id }}</td>
                                     <td>
                                         <span>
@@ -261,6 +258,34 @@ onMounted(async () => {
                         </div>
                         <div class="tab-pane fade" id="hot-place-tab-pane" role="tabpanel"
                              aria-labelledby="hot-place-tab" tabindex="0">...
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <nav>
+                                <ul class="pagination">
+                                    <!-- li속성에 page-item을 class에 추가하고 특정 조건에 따라 disabled를 추가해야함 -->
+                                    <li :class="[{'page-item': true}, {'disabled': state.prevPageGroup < 0}]">
+                                        <button :class="[{'page-link': true}, {'text-info': state.prevPageGroupPage > 0}]"
+                                                    @click="updateCurrentPage(state.prevPageGroupPage)">이전
+                                        </button>
+                                    </li>
+                                    <li v-for="page in state.pageGroup" :key="page"
+                                        :class="[{'page-item': true}, {'active': page === state.currentPage}]">
+                                        <button v-if="page === state.currentPage"
+                                                    class="page-link bg-info text-white border-info"
+                                                    @click="updateCurrentPage(page)">{{ page }}
+                                        </button>
+                                        <button v-else class="page-link text-info"
+                                                    @click="updateCurrentPage(page)">{{ page }}
+                                        </button>
+                                    </li>
+                                    <li :class="[{'page-item': true}, {'disabled': state.nextPageGroupPage > state.maxPage}]">
+                                        <button
+                                                :class="[{'page-link': true}, {'text-info': state.nextPageGroupPage <= state.maxPage}]"
+                                                @click="updateCurrentPage(state.nextPageGroupPage)">다음
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
