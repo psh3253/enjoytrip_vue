@@ -18,11 +18,7 @@ onMounted(async () => {
         alert('로그인이 필요합니다.');
         router.push('/login');
     }
-    await axios.get(`/hot-places/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/hot-places/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             state.hotPlace = response.data;
         }
@@ -39,11 +35,7 @@ async function updateHotPlace(event) {
         visitDate: state.hotPlace.visitDate,
         placeType: state.hotPlace.placeType,
         content: state.hotPlace.content
-    }, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    }, {}).then(function (response) {
         if (response.status === 200) {
             router.push(`/hot-places/${route.params.id}`);
         }

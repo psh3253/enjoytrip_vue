@@ -25,11 +25,7 @@ onMounted(async () => {
         await router.push('/login');
     }
 
-    await axios.get(`/users/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/users/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             state.user = {
                 ...response.data,
@@ -44,9 +40,6 @@ onMounted(async () => {
         params: {
             type: 'post',
             page: state.postsCurrentPage
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -76,9 +69,6 @@ onMounted(async () => {
         params: {
             type: 'like',
             page: state.likePostsCurrentPage
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -108,9 +98,6 @@ onMounted(async () => {
         params: {
             type: 'comment',
             page: state.commentPostsCurrentPage
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {

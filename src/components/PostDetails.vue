@@ -30,11 +30,7 @@ onMounted(async () => {
     await getLikeUsers();
     await getComments();
 
-    await axios.get(`/users/me`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/users/me`, {}).then(function (response) {
         if (response.status === 200) {
             state.user = readonly(response.data);
         }
@@ -44,11 +40,7 @@ onMounted(async () => {
 });
 
 async function getPost() {
-    await axios.get(`/posts/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/posts/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             state.post = {...response.data, createdAt: response.data.createdAt.substring(0, 16).replace('T', ' ')}
         }
@@ -61,11 +53,7 @@ async function deletePost() {
     if (!confirm('게시글을 삭제하시겠습니까?')) {
         return;
     }
-    await axios.delete(`/posts/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.delete(`/posts/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             router.push('/posts');
         }
@@ -99,11 +87,7 @@ async function deleteComment(id) {
     if(!confirm('댓글을 삭제하시겠습니까?')) {
         return;
     }
-    await axios.delete(`/posts/${route.params.id}/comments/${id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.delete(`/posts/${route.params.id}/comments/${id}`, {}).then(function (response) {
         if (response.status === 200) {
             getComments();
         }
@@ -114,11 +98,7 @@ async function deleteComment(id) {
 }
 
 async function getLikeUsers() {
-    await axios.get(`/posts/${route.params.id}/like`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/posts/${route.params.id}/like`, {}).then(function (response) {
         if (response.status === 200) {
             state.likeUsers = response.data.map(user => {
                 let now = new Date();
@@ -144,11 +124,7 @@ async function getLikeUsers() {
 }
 
 async function getComments() {
-    await axios.get(`/posts/${route.params.id}/comments`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/posts/${route.params.id}/comments`, {}).then(function (response) {
         if (response.status === 200) {
             state.comments = response.data.map(comment => {
                 return {
@@ -162,11 +138,7 @@ async function getComments() {
     });
 }
 async function togglePostLike() {
-    await axios.post(`/posts/${route.params.id}/like`, {}, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.post(`/posts/${route.params.id}/like`, {}, {}).then(function (response) {
         if (response.status === 200) {
             getPost();
             getLikeUsers();
@@ -178,11 +150,7 @@ async function togglePostLike() {
 }
 
 async function togglePostNotice() {
-    await axios.post(`/posts/${route.params.id}/notice`, {}, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.post(`/posts/${route.params.id}/notice`, {}, {}).then(function (response) {
         if (response.status === 200) {
             getPost();
         }

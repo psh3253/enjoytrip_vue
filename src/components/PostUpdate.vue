@@ -18,11 +18,7 @@ onMounted(async () => {
         await router.push('/login');
         return;
     }
-    await axios.get(`/posts/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/posts/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             state.post = response.data;
         }
@@ -37,11 +33,7 @@ async function updatePost(event) {
         id: state.post.id,
         title: state.post.title,
         content: state.post.content
-    }, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    }, {}).then(function (response) {
         if (response.status === 200) {
             router.push(`/posts/${route.params.id}`);
         }
