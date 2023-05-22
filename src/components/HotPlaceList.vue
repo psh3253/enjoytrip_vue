@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, reactive} from "vue";
+import {computed, onMounted, reactive, readonly, watch} from "vue";
 import axios from "axios";
 import store from "@/store";
 import router from "@/router";
@@ -16,7 +16,7 @@ const state = reactive({
     nextPageGroupPage: 1,
     prevPageGroupPage: 1,
     maxPage: 1,
-    // keyword: ''
+    keyword: ''
 });
 
 const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
@@ -27,37 +27,22 @@ onMounted(async () => {
         alert('로그인이 필요합니다.');
         await router.push('/login');
     }
-    await axios.get('/hot-places', {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
-        if (response.status === 200) {
-            state.hotPlaces = response.data.map(hotPlace => {
-                let now = new Date();
-                if (now.getFullYear() === new Date(hotPlace.createdAt).getFullYear() &&
-                    now.getMonth() === new Date(hotPlace.createdAt).getMonth() &&
-                    now.getDate() === new Date(hotPlace.createdAt).getDate()
-                ) {
-                    return {
-                        ...hotPlace,
-                        createdAt: hotPlace.createdAt.substring(11, 16)
-                    };
-                } else {
-                    return {
-                        ...hotPlace,
-                        createdAt: hotPlace.createdAt.substring(0, 10)
-                    };
-                }
-            });
-        }
-    }).catch(function (error) {
-        console.log(error);
-    });
+
+    // querystring으로부터 얻어오기
+    state.currentPage = Number(new URLSearchParams(window.location.search).get('page')) || 1;
+    state.keyword = new URLSearchParams(window.location.search).get('keyword') || '';
+    // 데이터 로딩 함수 호출
+    await loadData();
 })
 
 function updateCurrentPage(page) {
     state.currentPage = page;
+    loadData();
+}
+
+function search(event) {
+    event.preventDefault();
+    state.currentPage = 1;
     loadData();
 }
 
@@ -93,7 +78,7 @@ async function loadData() {
     // 핫플레이스 데이터 요청
     await axios.get('/hot-places', {
         params: {
-            // keyword: state.keyword,
+            keyword: state.keyword,
             page: state.currentPage
         },
         headers: {
@@ -101,20 +86,20 @@ async function loadData() {
         }
     }).then(function (response) {
         if (response.status === 200) {
-            state.posts = response.data.map(post => {
+            state.hotPlaces = response.data.map(hotPlace => {
                 let now = new Date();
-                if (now.getFullYear() === new Date(post.createdAt).getFullYear() &&
-                    now.getMonth() === new Date(post.createdAt).getMonth() &&
-                    now.getDate() === new Date(post.createdAt).getDate()
+                if (now.getFullYear() === new Date(hotPlace.createdAt).getFullYear() &&
+                    now.getMonth() === new Date(hotPlace.createdAt).getMonth() &&
+                    now.getDate() === new Date(hotPlace.createdAt).getDate()
                 ) {
                     return {
-                        ...post,
-                        createdAt: post.createdAt.substring(11, 16)
+                        ...hotPlace,
+                        createdAt: hotPlace.createdAt.substring(11, 16)
                     };
                 } else {
                     return {
-                        ...post,
-                        createdAt: post.createdAt.substring(0, 10)
+                        ...hotPlace,
+                        createdAt: hotPlace.createdAt.substring(0, 10)
                     };
                 }
             });
