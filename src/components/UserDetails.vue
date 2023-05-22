@@ -37,11 +37,7 @@ onMounted(async () => {
         await router.push('/login');
     }
 
-    await axios.get(`/users/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/users/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             state.user = {
                 ...response.data,
@@ -68,14 +64,14 @@ function updateType(type) {
 
 async function loadData() {
     //페이지 정보 요청
-    const url = `/posts/profile-page`; // 요청 URL
+    let url = `/posts`; // 요청 URL
+    if (state.type === "hotPlace") {
+        url = "/hot-places";
+    }
 
-    await axios.get(url, {
+    await axios.get(url+`/profile-page`, {
         params: {
             type: state.type
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -96,14 +92,11 @@ async function loadData() {
     for (let i = state.startPage; i <= state.endPage; i++) {
         state.pageGroup.push(i);
     }
-
-    await axios.get(`/posts/profile-posts`, {
+    
+    await axios.get(url+`/profile-posts`, {
         params: {
             type: state.type,
             page: state.currentPage
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -180,7 +173,7 @@ async function loadData() {
                         <li class="nav-item" role="presentation">
                             <button class="nav-link custom-color" id="hot-place-tab" data-bs-toggle="tab"
                                     data-bs-target="#hot-place-tab-pane" type="button" role="tab"
-                                    aria-controls="hot-place-tab-pane" aria-selected="false">핫플레이스
+                                    aria-controls="hot-place-tab-pane" aria-selected="false" @click="updateType('hotPlace')">핫플레이스
                             </button>
                         </li>
                     </ul>
@@ -215,8 +208,8 @@ async function loadData() {
                             <table class="table" style="table-layout: fixed">
                                 <thead>
                                 <tr>
-                                    <th scope="col" class="text-center" style="width: 7%;">번호</th>
-                                    <th scope="col" class="text-center" style="width: 56%">제목</th>
+                                    <th scope="col" class="text-center" style="width: 10%;">번호</th>
+                                    <th scope="col" class="text-center" style="width: 53%">제목</th>
                                     <th scope="col" class="text-center" style="width: 15%">작성자</th>
                                     <th scope="col" class="text-center" style="width: 15%">작성일</th>
                                     <th scope="col" class="text-center" style="width: 7%">조회수</th>
@@ -243,8 +236,8 @@ async function loadData() {
                             <table class="table" style="table-layout: fixed">
                                 <thead>
                                 <tr>
-                                    <th scope="col" class="text-center" style="width: 7%;">번호</th>
-                                    <th scope="col" class="text-center" style="width: 56%">제목</th>
+                                    <th scope="col" class="text-center" style="width: 10%;">번호</th>
+                                    <th scope="col" class="text-center" style="width: 53%">제목</th>
                                     <th scope="col" class="text-center" style="width: 15%">작성자</th>
                                     <th scope="col" class="text-center" style="width: 15%">작성일</th>
                                     <th scope="col" class="text-center" style="width: 7%">조회수</th>
@@ -267,7 +260,32 @@ async function loadData() {
                             </table>
                         </div>
                         <div class="tab-pane fade" id="hot-place-tab-pane" role="tabpanel"
-                             aria-labelledby="hot-place-tab" tabindex="0">...
+                             aria-labelledby="hot-place-tab" tabindex="0">
+                             <table class="table" style="table-layout: fixed">
+                                <thead>
+                                <tr>
+                                    <th scope="col" class="text-center" style="width: 10%;">번호</th>
+                                    <th scope="col" class="text-center" style="width: 53%">이름</th>
+                                    <th scope="col" class="text-center" style="width: 15%">작성자</th>
+                                    <th scope="col" class="text-center" style="width: 15%">작성일</th>
+                                    <th scope="col" class="text-center" style="width: 7%">조회수</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="post in state.posts" :key="post.id">
+                                    <td class="text-center">{{ post.id }}</td>
+                                    <td>
+                                        <span>
+                                            <router-link class="text-decoration-none text-reset"
+                                                         :to="`/hot-places/${post.id}`">&nbsp;{{ post.name }}</router-link>
+                                        </span>
+                                    </td>
+                                    <td class="text-center">{{ post.creatorNickname }}</td>
+                                    <td class="text-center">{{ post.createdAt }}</td>
+                                    <td class="text-center">{{ post.views }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="d-flex justify-content-center">
                             <nav>
