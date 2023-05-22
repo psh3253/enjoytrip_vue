@@ -25,7 +25,6 @@ async function write(event) {
         content: state.content
     }, {
         headers: {
-            Authorization: `Bearer ${accessToken.value}`,
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         }

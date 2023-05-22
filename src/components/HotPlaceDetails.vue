@@ -20,11 +20,7 @@ onMounted(async () => {
         await router.push('/login');
     }
 
-    await axios.get(`/hot-places/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(async function (response) {
+    await axios.get(`/hot-places/${route.params.id}`, {}).then(async function (response) {
         if (response.status === 200) {
             // createdAt 날짜 형식 변환
             state.hotPlace = {
@@ -36,11 +32,7 @@ onMounted(async () => {
         console.log(error);
     });
 
-    await axios.get('/users/me', {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get('/users/me', {}).then(function (response) {
         if (response.status === 200) {
             state.user = response.data;
         }
@@ -95,11 +87,7 @@ async function deleteHotPlace()
     if(!confirm('삭제하시겠습니까?')) {
         return;
     }
-    await axios.delete(`/hot-places/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.delete(`/hot-places/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             alert('삭제되었습니다.');
             router.push('/hot-places');

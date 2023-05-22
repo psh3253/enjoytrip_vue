@@ -2,6 +2,7 @@
 import {computed, onMounted, reactive} from "vue";
 import axios from "axios";
 import store from "@/store";
+import router from "@/router";
 
 const state = reactive({
     user: {}
@@ -16,11 +17,7 @@ onMounted(async () => {
         return;
     }
 
-    await axios.get('/users/me', {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then((response) => {
+    await axios.get('/users/me', {}).then((response) => {
         if (response.status === 200) {
             state.user = response.data;
         }

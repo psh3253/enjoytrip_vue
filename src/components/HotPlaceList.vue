@@ -51,9 +51,6 @@ async function loadData() {
     await axios.get('/hot-places/page', {
         params: {
             keyword: state.keyword
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -80,9 +77,6 @@ async function loadData() {
         params: {
             keyword: state.keyword,
             page: state.currentPage
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {

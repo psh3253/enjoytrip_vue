@@ -37,11 +37,7 @@ onMounted(async () => {
         await router.push('/login');
     }
 
-    await axios.get(`/users/${route.params.id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then(function (response) {
+    await axios.get(`/users/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
             state.user = {
                 ...response.data,
@@ -73,9 +69,6 @@ async function loadData() {
     await axios.get(url, {
         params: {
             type: state.type
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
@@ -101,9 +94,6 @@ async function loadData() {
         params: {
             type: state.type,
             page: state.currentPage
-        },
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
         }
     }).then(function (response) {
         if (response.status === 200) {
