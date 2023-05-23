@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, reactive, readonly, watch} from "vue";
+import {computed, onMounted, reactive, readonly} from "vue";
 import store from "@/store";
 import router from "@/router";
 import {useRoute} from "vue-router";
@@ -135,23 +135,19 @@ async function loadData() {
         <div class="d-flex flex-column w-50">
             <h1 class="fw-bold mt-5 mb-3 text-center">프로필 정보</h1>
             <div class="d-flex flex-column">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="d-flex me-3">
-                        <img :src="`${apiBaseUrl}/users/images/${state.user.imageFileName}`"
-                            class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
-                    </div>
-                    <div class="d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex me-3">
+                            <img :src="`${apiBaseUrl}/users/images/${state.user.imageFileName}`"
+                                 class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
+                        </div>
+                        <div class="d-flex flex-column">
                         <span class="fw-bold">{{ state.user.nickname }}
                             <span v-if="state.user.email !== ''">({{ state.user.email }})</span>&nbsp;
                             <span v-if="state.user.role === 'ROLE_ADMIN'" class="badge bg-danger">관리자</span>
                             <span v-else class="badge bg-info">일반회원</span>&nbsp;
-                            <span v-if="state.user.id === state.loginUser.id" class="badge">
-                                <router-link :to="`/users/edit-profile`">
-                                    <button type="button" class="badge btn btn-secondary"><i class="bi bi-gear-fill"></i> 수정</button>
-                                </router-link>
-                            </span>
                         </span>
-                        <span class="text-secondary">
+                            <span class="text-secondary">
                             <span class="me-3">가입 {{ state.user.createdAt }}</span>
                             <span class="me-3">작성글 <span class="fw-bold text-black">{{
                                 state.user.postCount
@@ -159,6 +155,11 @@ async function loadData() {
                             <span class="me-3">댓글 <span class="fw-bold text-black">{{ state.user.commentCount }}</span></span>
                             <span>핫플레이스 <span class="fw-bold text-black">{{ state.user.hotPlaceCount }}</span></span>
                         </span>
+                        </div>
+                    </div>
+                    <div v-if="state.loginUser.id === state.user.id" class="d-flex justify-content-end">
+                        <router-link class="btn btn-info text-white" to="/users/edit-profile">프로필 수정
+                        </router-link>
                     </div>
                 </div>
                 <div>
@@ -172,25 +173,28 @@ async function loadData() {
                         <li class="nav-item" role="presentation">
                             <button class="nav-link custom-color" id="comment-tab" data-bs-toggle="tab"
                                     data-bs-target="#comment-tab-pane" type="button" role="tab"
-                                    aria-controls="profile-tab-pane" aria-selected="false" @click="updateType('comment')">댓글단 글
+                                    aria-controls="profile-tab-pane" aria-selected="false"
+                                    @click="updateType('comment')">댓글단 글
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link custom-color" id="like-tab" data-bs-toggle="tab"
                                     data-bs-target="#like-tab-pane" type="button" role="tab"
-                                    aria-controls="like-tab-pane" aria-selected="false" @click="updateType('like')">좋아요한 글
+                                    aria-controls="like-tab-pane" aria-selected="false" @click="updateType('like')">좋아요한
+                                글
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link custom-color" id="hot-place-tab" data-bs-toggle="tab"
                                     data-bs-target="#hot-place-tab-pane" type="button" role="tab"
-                                    aria-controls="hot-place-tab-pane" aria-selected="false" @click="updateType('hotPlace')">핫플레이스
+                                    aria-controls="hot-place-tab-pane" aria-selected="false"
+                                    @click="updateType('hotPlace')">핫플레이스
                             </button>
                         </li>
                     </ul>
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="post-tab-pane" role="tabpanel"
-                            aria-labelledby="post-tab" tabindex="0">
+                             aria-labelledby="post-tab" tabindex="0">
                             <table class="table" style="table-layout: fixed">
                                 <thead>
                                 <tr>
@@ -272,7 +276,7 @@ async function loadData() {
                         </div>
                         <div class="tab-pane fade" id="hot-place-tab-pane" role="tabpanel"
                              aria-labelledby="hot-place-tab" tabindex="0">
-                             <table class="table" style="table-layout: fixed">
+                            <table class="table" style="table-layout: fixed">
                                 <thead>
                                 <tr>
                                     <th scope="col" class="text-center" style="width: 10%;">번호</th>
@@ -288,7 +292,9 @@ async function loadData() {
                                     <td>
                                         <span>
                                             <router-link class="text-decoration-none text-reset"
-                                                         :to="`/hot-places/${post.id}`">&nbsp;{{ post.name }}</router-link>
+                                                         :to="`/hot-places/${post.id}`">&nbsp;{{
+                                                post.name
+                                                }}</router-link>
                                         </span>
                                     </td>
                                     <td class="text-center">{{ post.creatorNickname }}</td>
@@ -304,17 +310,17 @@ async function loadData() {
                                     <!-- li속성에 page-item을 class에 추가하고 특정 조건에 따라 disabled를 추가해야함 -->
                                     <li :class="[{'page-item': true}, {'disabled': state.prevPageGroup < 0}]">
                                         <button :class="[{'page-link': true}, {'text-info': state.prevPageGroupPage > 0}]"
-                                                    @click="updateCurrentPage(state.prevPageGroupPage)">이전
+                                                @click="updateCurrentPage(state.prevPageGroupPage)">이전
                                         </button>
                                     </li>
                                     <li v-for="page in state.pageGroup" :key="page"
                                         :class="[{'page-item': true}, {'active': page === state.currentPage}]">
                                         <button v-if="page === state.currentPage"
-                                                    class="page-link bg-info text-white border-info"
-                                                    @click="updateCurrentPage(page)">{{ page }}
+                                                class="page-link bg-info text-white border-info"
+                                                @click="updateCurrentPage(page)">{{ page }}
                                         </button>
                                         <button v-else class="page-link text-info"
-                                                    @click="updateCurrentPage(page)">{{ page }}
+                                                @click="updateCurrentPage(page)">{{ page }}
                                         </button>
                                     </li>
                                     <li :class="[{'page-item': true}, {'disabled': state.nextPageGroupPage > state.maxPage}]">
