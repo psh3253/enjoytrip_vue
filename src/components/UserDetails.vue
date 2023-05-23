@@ -12,12 +12,6 @@ const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
 const state = reactive({
     user: {},
     posts: [],
-    // likePosts: [],
-    // commentPosts: [],
-    // postsCurrentPage: 1,
-    // likePostsCurrentPage: 1,
-    // commentPostsCurrentPage: 1,
-
     type: "post",
     startPage: 1,
     endPage: 1,
@@ -138,7 +132,11 @@ async function loadData() {
                     <div class="d-flex flex-column">
                         <span class="fw-bold">{{ state.user.nickname }}({{ state.user.email }})
                              <span v-if="state.user.role === 'ROLE_ADMIN'" class="badge bg-danger">관리자</span>
-                            <span v-else class="badge bg-info">일반회원</span>
+                            <span v-else class="badge bg-info">일반회원</span>&nbsp;
+                            <span class="badge"><router-link :to="`/users/edit-profile`">
+                                <button type="button" class="badge btn btn-secondary"><i class="bi bi-gear-fill"></i> 수정</button>
+                                                    
+                                                </router-link></span>
                         </span>
                         <span class="text-secondary">
                             <span class="me-3">가입 {{ state.user.createdAt }}</span>

@@ -1,5 +1,7 @@
 <template>
-  <Header></Header>
+  <Header>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+  </Header>
   <section>
     <router-view></router-view>
   </section>
