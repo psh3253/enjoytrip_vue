@@ -13,6 +13,7 @@ const state = reactive({
     password: '',
     newPassword: '',
     newPasswordConfirm: '',
+    withdrawPassword: '',
     announce: '',
     announceColor: ''
 })
@@ -131,12 +132,11 @@ async function changePassword() {
 }
 
 async function withdraw() {
-    await axios.delete('/users/', {}, {
+    await axios.delete('/users/', {
         params: {
-            password: state.password
+            password: state.withdrawPassword
         },
         headers: {
-            'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
         }
     }).then((response) => {
@@ -146,12 +146,7 @@ async function withdraw() {
             logout();
         }
     }).catch((error) => {
-        // console.log(error);
-        if (error.state === 401) {
-            alert("비밀번호가 틀렸습니다.");
-        } else if (error.state === 403) {
-            console.log("password null");
-        }
+        console.log(error);
     })
 }
 
@@ -200,8 +195,11 @@ function logout() {
                 <div class="tab-pane fade show active" id="image-tab-pane" role="tabpanel"
                         aria-labelledby="image-tab" tabindex="0">
                     <div class="mb-3">
-                        <img :src="`${apiBaseUrl}/users/images/${state.user.imageFileName}`"
-                             class="image-box rounded-square border border-2 border-dark" width="400" height="400" alt="">
+                        <div class="text-center">
+                            <img :src="`${apiBaseUrl}/users/images/${state.user.imageFileName}`"
+                                class="image-box rounded border border-2 border-dark img-thumbnail" width="400" height="400" alt="" >
+                        </div>
+                        <br>
                         <input type="file" id="file" class="form-control" accept="image/*"
                             @change="changeFile" required/>
                     </div>
@@ -250,8 +248,8 @@ function logout() {
                 <div class="tab-pane fade" id="withdraw-tab-pane" role="tabpanel" aria-labelledby="withdraw-tab"
                         tabindex="3">
                     <div class="mb-3">
-                        <label for="password" class="form-label">비밀번호</label>
-                        <input type="password" class="form-control" v-model="state.password" size="30" required/>
+                        <label for="withdraw-password" class="form-label">비밀번호</label>
+                        <input type="password" class="form-control" v-model="state.withdrawPassword" size="30" required/>
                     </div>
                     <div class="mb-3">
                         <input type="submit" id="withdraw-user" value="탈퇴하기" class="btn btn-danger container-fluid" @click="withdraw()">
@@ -263,5 +261,17 @@ function logout() {
 </template>
 
 <style scoped>
+.nav-link.active {
+    color: #6c757d;
+}
 
+.nav-link:not(.active) {
+    color: #0dcaf0;
+}
+
+td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 </style>
