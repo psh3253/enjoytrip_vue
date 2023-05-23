@@ -11,11 +11,19 @@ const state = reactive({
     markers: [],
     tourList: [],
     latSum: 0,
-    lngSum: 0
+    lngSum: 0,
+    path: {},
+    keyword: '',
+    contentId: 0,
+    destination: '',
 });
 const noneImage = require('@/assets/img/none.jpg');
 
 let map = {};
+// eslint-disable-next-line no-unused-vars
+let pathMap = {};
+
+let polylines = [];
 
 onMounted(async () => {
     await axios.get('/tours/sidos')
@@ -40,6 +48,13 @@ onMounted(async () => {
 
             // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
             map = new kakao.maps.Map(mapContainer, mapOption);
+            const pathMapContainer = document.getElementById('path-map'); // 지도를 표시할 div
+            const pathMapOption = {
+                center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+                level: 3 // 지도의 확대 레벨
+            };
+
+            pathMap = new kakao.maps.Map(pathMapContainer, pathMapOption);
         })
     })
     document.head.appendChild(script)
@@ -59,6 +74,7 @@ async function getGuguns(event) {
         console.log(error);
     });
 }
+
 async function search() {
     if (state.sidoCode === 0 || state.gugunCode === 0 || state.contentTypeId === 0) {
         alert('지역과 분류를 선택해주세요.');
@@ -81,20 +97,22 @@ async function search() {
             state.markers = [];
             state.latSum = 0;
             state.lngSum = 0;
-            // const tbody = document.querySelector('tbody');
-            // tbody.innerHTML = '';
 
             await makeMarker();
-            // showTables();
-            map.setCenter(new kakao.maps.LatLng(state.latSum / state.tourList.length, state.lngSum / state.tourList.length));
-            map.setLevel(8);
+
+            const bounds = new kakao.maps.LatLngBounds();
+
+            for (let i = 0; i < state.tourList.length; i++) {
+                bounds.extend(new kakao.maps.LatLng(state.tourList[i].latitude, state.tourList[i].longitude));
+            }
+            map.setBounds(bounds);
         }
     }).catch(function (error) {
         console.log(error);
     });
 }
 
-function makeMarker() {
+async function makeMarker() {
     for (let i = 0; i < state.tourList.length; i++) {
         const tour = state.tourList[i];
         const marker = new kakao.maps.Marker({
@@ -127,6 +145,85 @@ function makeMarker() {
             infoWindow.open(map, marker);
         });
     }
+}
+
+function openPathMap(contentId, destination) {
+    state.contentId = contentId;
+    state.destination = destination;
+    state.keyword = '';
+    state.path = {};
+    for (let i = 0; i < polylines.length; i++) {
+        polylines[i].setMap(null);
+    }
+    setTimeout(function () {
+        pathMap.relayout();
+    }, 200);
+}
+
+async function searchPath() {
+    for (let i = 0; i < polylines.length; i++) {
+        polylines[i].setMap(null);
+    }
+    await axios.get('/tours/paths', {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        params: {
+            contentId: state.contentId,
+            keyword: state.keyword
+        }
+    }).then(function (response) {
+        if (response.status === 200) {
+            // 시간이 현재 초 단위라 이를 시와 분으로 변환
+            // 거리거 현재 m 기준이라 이를 km와 m로 변환
+            state.path = {
+                ...response.data,
+                time: Math.floor(response.data.time / 3600) + '시간 ' + Math.floor((response.data.time % 3600) / 60) + '분',
+                distance: Math.floor(response.data.distance / 1000) + 'km ' + response.data.distance % 1000 + 'm'
+            };
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+    let points = [];
+
+    for (let i = 0; i < state.path.roadList.length; i++) {
+        const road = state.path.roadList[i];
+        const trafficState = road.trafficState;
+        const coordinates = road.coordinates;
+        let color = '#808080';
+        if (trafficState === 1) {
+            color = '#ff0000';
+        } else if (trafficState === 2) {
+            color = '#ff8000';
+        } else if (trafficState === 3) {
+            color = '#ffff00';
+        } else if (trafficState === 4) {
+            color = '#00ff00';
+        }
+        let paths = [];
+        for (let j = 0; j < coordinates.length; j++) {
+            paths.push(new kakao.maps.LatLng(coordinates[j].latitude, coordinates[j].longitude));
+            points.push(new kakao.maps.LatLng(coordinates[j].latitude, coordinates[j].longitude));
+        }
+        const polyline = new kakao.maps.Polyline({
+            path: paths, // 선을 구성하는 좌표배열 입니다
+            strokeWeight: 5, // 선의 두께 입니다
+            strokeColor: color, // 선의 색깔입니다
+            strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+            strokeStyle: 'solid' // 선의 스타일입니다
+        });
+        polylines.push(polyline);
+        polyline.setMap(pathMap);
+    }
+    const bounds = new kakao.maps.LatLngBounds();
+
+    for (let i = 0; i < points.length; i++) {
+        bounds.extend(points[i]);
+    }
+    pathMap.setBounds(bounds);
+    // pathMap.setCenter(new kakao.maps.LatLng(state.path.latitude, state.path.longitude));
+    // pathMap.setLevel(9);
 }
 
 </script>
@@ -188,19 +285,63 @@ function makeMarker() {
                     </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="tour in state.tourList" :key="tour.title">
-                            <td>
-                                <img v-if="tour.image != null && tour.image !== ''" :src="tour.image" alt="" style="width: 64px; height: 64px">
-                                <img v-else src="@/assets/img/none.jpg" alt="" style="width: 64px; height: 64px">
-                            </td>
-                            <td class="align-middle fw-bold">{{tour.title}}</td>
-                            <td class="align-middle">{{tour.address}}</td>
-                            <td class="align-middle">
-                                <button class="btn btn-info text-white">보기</button>
-                            </td>
-                        </tr>
+                    <tr v-for="tour in state.tourList" :key="tour.title">
+                        <td>
+                            <img v-if="tour.image != null && tour.image !== ''" :src="tour.image" alt=""
+                                 style="width: 64px; height: 64px">
+                            <img v-else src="@/assets/img/none.jpg" alt="" style="width: 64px; height: 64px">
+                        </td>
+                        <td class="align-middle fw-bold">{{ tour.title }}</td>
+                        <td class="align-middle">{{ tour.address }}</td>
+                        <td class="align-middle">
+                            <button type="button" class="btn btn-info text-white" data-bs-target="#pathModal"
+                                    data-bs-toggle="modal" @click="openPathMap(tour.contentId, tour.title)">
+                                보기
+                            </button>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="pathModal" aria-hidden="true" aria-labelledby="pathLabel" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="pathLabel">경로 탐색</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex">
+                        <div class="d-flex me-3">
+                            <div id="path-map" style="width: 500px; height: 700px"></div>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <div class="mb-3">
+                                <label class="form-label">출발지</label>
+                                <input type="text" v-model="state.keyword" class="form-control" placeholder="예) 서울시청">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">도착지</label>
+                                <input type="text" v-model="state.destination" class="form-control" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-info text-white container-fluid" @click="searchPath()">탐색
+                                </button>
+                            </div>
+                            <div class="mb-3">
+                                <p>예상 시간 : {{ state.path.time }}</p>
+                                <p>예상 거리 : {{ state.path.distance }}</p>
+                                <p>예상 택시 요금 : {{ state.path.taxiFare }}원</p>
+                                <p>예상 톨게이트 요금 : {{ state.path.tollFare }}원</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                </div>
             </div>
         </div>
     </div>
