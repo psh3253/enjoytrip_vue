@@ -74,7 +74,7 @@ async function loadData() {
         url = "/hot-places";
     }
 
-    await axios.get(url+`/profile-page`, {
+    await axios.get(url+`/profile-page/${route.params.id}`, {
         params: {
             type: state.type
         }
@@ -98,7 +98,7 @@ async function loadData() {
         state.pageGroup.push(i);
     }
     
-    await axios.get(url+`/profile-posts`, {
+    await axios.get(url+`/profile-posts/${route.params.id}`, {
         params: {
             type: state.type,
             page: state.currentPage
