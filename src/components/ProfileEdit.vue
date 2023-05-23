@@ -2,6 +2,7 @@
 import {computed, onMounted, reactive} from "vue";
 import axios from "axios";
 import store from "@/store";
+import router from "@/router";
 
 const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
 
@@ -25,16 +26,6 @@ onMounted(async () => {
         return;
     }
 
-    await axios.get('/users/me', {
-        headers: {
-            Authorization: `Bearer ${accessToken.value}`
-        }
-    }).then((response) => {
-        loadData();
-    })
-});
-
-async function loadData() {
     await axios.get('/users/me', {}).then((response) => {
         if (response.status === 200) {
             state.user = response.data;
@@ -43,7 +34,7 @@ async function loadData() {
         console.log(error);
     })
 
-}
+})
 
 async function changeFile(event) {
     const fileDOM = document.querySelector('#file');

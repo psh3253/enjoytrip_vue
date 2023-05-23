@@ -113,7 +113,6 @@ async function createHotPlace(event) {
     formData.append('file', state.file);
     await axios.post('/hot-places', formData, {
         headers: {
-            'Authorization': `Bearer ${accessToken.value}`,
             'Content-Type': 'multipart/form-data',
             'Access-Control-Allow-Origin': '*'
         }
