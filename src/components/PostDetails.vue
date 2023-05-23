@@ -42,7 +42,7 @@ onMounted(async () => {
 async function getPost() {
     await axios.get(`/posts/${route.params.id}`, {}).then(function (response) {
         if (response.status === 200) {
-            state.post = {...response.data, createdAt: response.data.createdAt.substring(0, 16).replace('T', ' ')}
+            state.post = { ...response.data, createdAt: response.data.createdAt.substring(0, 16).replace('T', ' ') }
         }
     }).catch(function (error) {
         console.log(error);
@@ -182,7 +182,7 @@ function showComments() {
                 </span>
                 <div class="d-flex align-items-center mb-2">
                     <div class="d-flex me-3">
-                        <img src="@/assets/img/no-profile-image.png"
+                        <img :src="`${apiBaseUrl}/users/images/${state.post.creatorImage}`"
                              class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
                     </div>
                     <div class="d-flex flex-column">

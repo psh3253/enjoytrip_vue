@@ -11,13 +11,8 @@ const apiBaseUrl = process.env.VUE_APP_API_BASE_URL;
 
 const state = reactive({
     user: {},
+    loginUser: {},
     posts: [],
-    // likePosts: [],
-    // commentPosts: [],
-    // postsCurrentPage: 1,
-    // likePostsCurrentPage: 1,
-    // commentPostsCurrentPage: 1,
-
     type: "post",
     startPage: 1,
     endPage: 1,
@@ -42,6 +37,16 @@ onMounted(async () => {
             state.user = {
                 ...response.data,
                 createdAt: response.data.createdAt.substring(0, 10)
+            }
+        }
+    }).catch(function (error) {
+        console.log(error);
+    });
+
+    await axios.get(`/users/me`, {}).then(function (response) {
+        if (response.status === 200) {
+            state.loginUser = {
+                ...response.data,
             }
         }
     }).catch(function (error) {
@@ -133,12 +138,18 @@ async function loadData() {
                 <div class="d-flex align-items-center mb-3">
                     <div class="d-flex me-3">
                         <img :src="`${apiBaseUrl}/users/images/${state.user.imageFileName}`"
-                             class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
+                            class="rounded-circle border border-2 border-dark" width="64" height="64" alt="">
                     </div>
                     <div class="d-flex flex-column">
-                        <span class="fw-bold">{{ state.user.nickname }}({{ state.user.email }})
-                             <span v-if="state.user.role === 'ROLE_ADMIN'" class="badge bg-danger">관리자</span>
-                            <span v-else class="badge bg-info">일반회원</span>
+                        <span class="fw-bold">{{ state.user.nickname }}
+                            <span v-if="state.user.email !== ''">({{ state.user.email }})</span>&nbsp;
+                            <span v-if="state.user.role === 'ROLE_ADMIN'" class="badge bg-danger">관리자</span>
+                            <span v-else class="badge bg-info">일반회원</span>&nbsp;
+                            <span v-if="state.user.id === state.loginUser.id" class="badge">
+                                <router-link :to="`/users/edit-profile`">
+                                    <button type="button" class="badge btn btn-secondary"><i class="bi bi-gear-fill"></i> 수정</button>
+                                </router-link>
+                            </span>
                         </span>
                         <span class="text-secondary">
                             <span class="me-3">가입 {{ state.user.createdAt }}</span>
@@ -179,7 +190,7 @@ async function loadData() {
                     </ul>
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="post-tab-pane" role="tabpanel"
-                             aria-labelledby="post-tab" tabindex="0">
+                            aria-labelledby="post-tab" tabindex="0">
                             <table class="table" style="table-layout: fixed">
                                 <thead>
                                 <tr>
